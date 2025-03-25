@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outbox Events</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Outbox Events</h2>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Event Type</th>
+        <th>Payload</th>
+        <th>Created At</th>
+    </tr>
+    </thead>
+    <tbody id="events-table">
+    <!-- Events will be loaded here dynamically -->
+    </tbody>
+</table>
+
+<script>
+    async function fetchEvents() {
+        try {
+            const response = await fetch('http://localhost:8080/employee/api');
+            const events = await response.json();
+
+            const tableBody = document.getElementById('events-table');
+            tableBody.innerHTML = ''; // Clear previous data
+
+            events.forEach(event => {
+                const row = `<tr>
+                    <td>${event.id}</td>
+                    <td>${event.eventType}</td>
+                    <td>${event.payload}</td>
+                    <td>${event.createdAt}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        } catch (error) {
+            console.error("Error fetching events:", error);
+        }
+    }
+
+    // Fetch events on page load
+    window.onload = fetchEvents;
+
+    // Auto-refresh every 5 seconds
+    setInterval(fetchEvents, 5000);
+</script>
+
+</body>
+</html>

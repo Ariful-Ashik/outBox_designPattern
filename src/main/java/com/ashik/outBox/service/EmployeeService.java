@@ -6,10 +6,15 @@ import com.ashik.outBox.repository.EmployeeRepository;
 import com.ashik.outBox.repository.OutboxRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final OutboxRepository outboxRepository;
@@ -29,17 +34,28 @@ public class EmployeeService {
             String payload = objectMapper.writeValueAsString(savedEmployee);
             OutboxEvent event = new OutboxEvent(null, "EMPLOYEE_CREATED", payload, null);
             outboxRepository.save(event);
+
+            // 🔥 Log event creation
+            log.info("Outbox event created: ID = {}, Type = {}, Payload = {}", event.getId(), event.getEventType(), event.getPayload());
         } catch (Exception e) {
+            log.error(e.getMessage());
             System.err.println("Error saving outbox event: " + e.getMessage());
         }
+    }
+
+    public ResponseEntity<List<OutboxEvent>> findAll() {
+        List<OutboxEvent> outboxEvents = outboxRepository.findAll();
+        return ResponseEntity.ok(outboxEvents);
+    }
+
+    public List<OutboxEvent> findAlls() {
+        return outboxRepository.findAll();
     }
 }
 
 
-
-
 //@Service
-////@RequiredArgsConstructor
+/// /@RequiredArgsConstructor
 //public class EmployeeService {
 //    private final EmployeeRepository employeeRepository;
 //    private final OutboxRepository outboxRepository;
@@ -59,6 +75,7 @@ public class EmployeeService {
 //            String payload = objectMapper.writeValueAsString(savedEmployee);
 //            OutboxEvent event = new OutboxEvent(null, "EMPLOYEE_CREATED", payload, null);
 //            outboxRepository.save(event);
+
 //        } catch (Exception e) {
 //            throw new RuntimeException("Error saving outbox event", e);
 //        }
